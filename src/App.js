@@ -1,25 +1,124 @@
-import logo from './logo.svg';
-import './App.css';
+import { useCallback, useState, useRef } from 'react';
+import ReactFlow, {
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
+  Background,
+  MarkerType,
+} from 'react-flow-renderer';
 
-function App() {
+import initialNodes from './nodes.jsx';
+import initialEdges from './edges.jsx';
+
+const rfStyle = {
+  backgroundColor: '#D0C0F7',
+};
+
+
+
+function Flow() {
+  const [nodes, setNodes] = useState(initialNodes);
+  const [edges, setEdges] = useState(initialEdges);
+
+  const actualizarEntradas = (event, entrada, currentState) =>{
+
+    if(event.key === 'Enter'){
+      var newnodes = [];
+      var position = 0;
+      var newedges = [];
+      const value = event.target.value;
+
+      states.map(state => {
+        console.log(state);
+         newnodes = [...newnodes,
+          {
+           id: state,
+           data: {label: state},
+           position: {x: position, y:10}
+         }
+        ]
+        position += 190;
+
+      })
+      
+      newedges = value.split(',')
+      .flatMap(valueNoD => [...edges,
+        {
+          id: currentState.concat('-').concat(valueNoD),
+          source: currentState,
+          target: valueNoD,
+          label: entrada,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: '#FF0072',
+          }
+        }]);
+
+
+      console.log(newedges)
+      console.log(newnodes);
+      setNodes(newnodes);
+      setEdges(newedges);
+      console.log();
+      position = 0;
+    }
+  }
+
+  const onNodesChange = useCallback(
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    [setNodes]
+  );
+  const onEdgesChange = useCallback(
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    [setEdges]
+  );
+  const onConnect = useCallback(
+    (connection) => setEdges((eds) => addEdge(connection, eds)),
+    [setEdges]
+  );
+
+  const states = ['A','B', 'C','D','E','F']
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ height: 500 }}>
+      <table>
+        <tr>
+          <th>Estados</th>
+          <th>0</th>
+          <th>1</th>
+
+        </tr>
+
+        {
+          states
+          .map(state => {
+            return(
+            <tr>
+              <td>{state}</td>
+              <td><input type="text" onKeyDown={(e) => actualizarEntradas(e, "0", state)} /></td>
+              <td><input type="text" onKeyDown={(e) => actualizarEntradas(e, "1", state)} /></td>
+            </tr>)
+          })
+            
+        }
+      </table>
+      
+
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      fitView
+      style={rfStyle}
+      attributionPosition="top-right"
+    >
+      <Background />
+    </ReactFlow>
+
     </div>
   );
 }
 
-export default App;
+export default Flow;
