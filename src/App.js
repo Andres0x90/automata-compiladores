@@ -14,7 +14,7 @@ const rfStyle = {
   backgroundColor: '#D0C0F7',
 };
 
-const newstates = ['A'];
+const newstates = new Set('A');
 
 
 function Flow() {
@@ -59,14 +59,28 @@ function Flow() {
       setNodes(newnodes);
       setEdges(newedges);
       position = 0;
-      newstates.push(value);
+      newstates.add(value);
     }
   }
 
   const convertirNoDeterministico = () =>{
-    newstates.filter(newstate => newstate.includes(','))
-    .map(newstate => newstate.split(',')
-          .map())
+    console.log(Array.from(newstates));
+    console.log(Array.from(newstates).flatMap(newstate => newstate.includes(',')?
+     newstate.split(',')
+          .flatMap(stateNoD => [edges.filter(edge => edge.source === stateNoD && edge.label === '0')
+                          .map(edge => edge.target)
+                          .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge))
+                          ,
+                          edges.filter(edge => edge.source === stateNoD && edge.label === '1')
+                          .map(edge => edge.target)
+                          .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge))])
+      : [edges.filter(edge => edge.source === newstate && edge.label === '0')
+          .map(edge => edge.target)
+          .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
+          , 
+          edges.filter(edge => edge.source === newstate && edge.label === '1')
+          .map(edge => edge.target)
+          .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")]));
   }
 
   const onNodesChange = useCallback(
@@ -107,7 +121,6 @@ function Flow() {
             
         }
       </table>
-      
 
     <ReactFlow
       nodes={nodes}
@@ -121,6 +134,8 @@ function Flow() {
     >
       <Background />
     </ReactFlow>
+
+    <button onClick={convertirNoDeterministico}>Convertir automata a deterministico</button>
 
     </div>
   );
