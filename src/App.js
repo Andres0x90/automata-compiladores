@@ -14,6 +14,7 @@ const rfStyle = {
   backgroundColor: '#D0C0F7',
 };
 
+const newstates = ['A'];
 
 
 function Flow() {
@@ -55,13 +56,17 @@ function Flow() {
         }]);
 
 
-      console.log(newedges)
-      console.log(newnodes);
       setNodes(newnodes);
       setEdges(newedges);
-      console.log();
       position = 0;
+      newstates.push(value);
     }
+  }
+
+  const convertirNoDeterministico = () =>{
+    newstates.filter(newstate => newstate.includes(','))
+    .map(newstate => newstate.split(',')
+          .map())
   }
 
   const onNodesChange = useCallback(
