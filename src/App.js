@@ -95,23 +95,43 @@ function Flow() {
 
     }while(Array.from(newstates).length * 2 !== statesConverted.length)
 
+    statesConverted = statesConverted.map(stateConverted => stateConverted.length > 0? stateConverted: "ERROR");
+
     console.log(Array.from(newstates));
     console.log(statesConverted);
 
-    /*console.log(Array.from(newstates)
-      .map(newstate => newstate.replace(",", ""))
-      .flatMap((newstate, index) => [{
-        id: newstate,
-        data: {label: newstate},
-        position: {x: nodes[index], y: 90}
-    }]))
-    setNodesDeterministico(Array.from(newstates)
-      .map(newstate => newstate.replace(",", ""))
-      .flatMap((newstate, index) => [{
-        id: newstate,
-        data: {label: newstate},
-        position: {x: nodes[index], y: 90}
-    }]));*/
+    newstates = Array.from(newstates)
+    .map(newstate => newstate.replace(",", ""))
+    .map(newstate => newstate.length > 0? newstate: "ERROR")
+    .flatMap((newstate, index) => [{
+      id: newstate,
+      data: {label: newstate},
+      position: {x: index * 190, y: 90}
+  }]);
+
+  const newedges = newstates.map((state,index) => [{
+    id: state.id.concat('-').concat(statesConverted[index*2]).concat(uuidv4()),
+    source: state.id,
+    target: statesConverted[index*2],
+    label: '0',
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color: '#FF0072',
+    }
+  },
+  {
+    id: state.id.concat('-').concat(statesConverted[index*2+1]).concat(uuidv4()),
+    source: state.id,
+    target: statesConverted[index*2+1],
+    label: '1',
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color: '#FF0072',
+    }
+  }
+]);
+    setNodesDeterministico(newstates);
+    setEdgesDeterministico(newedges);
   }
 
   const onNodesChange = useCallback(
@@ -167,6 +187,27 @@ function Flow() {
     </ReactFlow>
 
     <button onClick={convertirNoDeterministico}>Convertir automata a deterministico</button>
+
+    <table>
+        <tr>
+          <th>Estados</th>
+          <th>0</th>
+          <th>1</th>
+
+        </tr>
+
+        {
+          edgesDeterministico
+          .map((tuplaEdge, index) => {
+            return(
+            <tr>
+              <td>{nodesDeterministico[index].id}</td>
+              {tuplaEdge.map(edge => <td>{edge.target}</td>)}
+            </tr>)
+          })
+            
+        }
+      </table>
 
     </div>
   );
