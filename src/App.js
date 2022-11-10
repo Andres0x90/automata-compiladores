@@ -147,6 +147,19 @@ function Flow() {
     [setEdges]
   );
 
+  const onNodesDChange = useCallback(
+    (changes) => setNodesDeterministico((nds) => applyNodeChanges(changes, nds)),
+    [setNodesDeterministico]
+  );
+  const onEdgesDChange = useCallback(
+    (changes) => setEdgesDeterministico((eds) => applyEdgeChanges(changes, eds)),
+    [setEdgesDeterministico]
+  );
+  const onConnectD = useCallback(
+    (connection) => setEdgesDeterministico((eds) => addEdge(connection, eds)),
+    [setEdgesDeterministico]
+  );
+
   const states = ['A','B', 'C','D','E']
 
   return (
@@ -208,6 +221,19 @@ function Flow() {
             
         }
       </table>
+
+      <ReactFlow
+      nodes={nodesDeterministico}
+      edges={edgesDeterministico.flatMap(edge => edge)}
+      onNodesChange={onNodesDChange}
+      onEdgesChange={onEdgesDChange}
+      onConnect={onConnectD}
+      fitView
+      style={rfStyle}
+      attributionPosition="top-right"
+    >
+      <Background />
+    </ReactFlow>
 
     </div>
   );
