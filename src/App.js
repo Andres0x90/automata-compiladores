@@ -9,6 +9,8 @@ import ReactFlow, {
 
 import initialNodes from './nodes.jsx';
 import initialEdges from './edges.jsx';
+import { v4 as uuidv4 } from 'uuid';
+
 
 const rfStyle = {
   backgroundColor: '#D0C0F7',
@@ -30,7 +32,6 @@ function Flow() {
       const value = event.target.value;
 
       states.map(state => {
-        console.log(state);
          newnodes = [...newnodes,
           {
            id: state,
@@ -41,11 +42,11 @@ function Flow() {
         position += 190;
 
       })
-      
-      newedges = value.split(',')
-      .flatMap(valueNoD => [...edges,
+
+      newedges = [...edges, value.split(',')
+      .flatMap(valueNoD => [
         {
-          id: currentState.concat('-').concat(valueNoD),
+          id: currentState.concat('-').concat(valueNoD).concat(uuidv4()),
           source: currentState,
           target: valueNoD,
           label: entrada,
@@ -53,8 +54,7 @@ function Flow() {
             type: MarkerType.ArrowClosed,
             color: '#FF0072',
           }
-        }]);
-
+        }])].flatMap(edge => edge);
 
       setNodes(newnodes);
       setEdges(newedges);
@@ -65,15 +65,21 @@ function Flow() {
 
   const convertirNoDeterministico = () =>{
     console.log(Array.from(newstates));
+    console.log(edges);
     console.log(Array.from(newstates).flatMap(newstate => newstate.includes(',')?
-     newstate.split(',')
-          .flatMap(stateNoD => [edges.filter(edge => edge.source === stateNoD && edge.label === '0')
-                          .map(edge => edge.target)
-                          .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge))
-                          ,
-                          edges.filter(edge => edge.source === stateNoD && edge.label === '1')
-                          .map(edge => edge.target)
-                          .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge))])
+        [newstate.split(',')
+        .flatMap(state => edges
+                  .filter(edge => edge.source === state && edge.label === '0')
+                  .map(edge => edge.target))
+        .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
+        , 
+        newstate.split(',')
+        .flatMap(state => edges
+          .filter(edge => edge.source === state && edge.label === '1')
+          .map(edge => edge.target))
+        .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
+      ]
+          
       : [edges.filter(edge => edge.source === newstate && edge.label === '0')
           .map(edge => edge.target)
           .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
