@@ -1,10 +1,18 @@
-A  B B,C
-B  A  C
-C  D  F
+A  A,B  B,C
+B  C    C,D
+C       A,B
+D  B
+E C,D
+
+
+A  AB BC 
+AB ABC BCD
+BC C   ABCD
+ABC ABC ABCD 
+BCD AC  ABCD
+C   ERROR AB
+ABCD ABC  ABCD
 
 
 
-A   B  BC
-B  A   C
-BC AD  CF
-C  D   F
+(6) ['A', 'B', 'B,C', 'C', 'D', 'F']

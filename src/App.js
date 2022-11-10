@@ -16,12 +16,14 @@ const rfStyle = {
   backgroundColor: '#D0C0F7',
 };
 
-const newstates = new Set('A');
+let newstates = new Set('A');
 
 
 function Flow() {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
+  const [nodesDeterministico, setNodesDeterministico] = useState([]);
+  const [edgesDeterministico, setEdgesDeterministico] = useState([]);
 
   const actualizarEntradas = (event, entrada, currentState) =>{
 
@@ -29,7 +31,7 @@ function Flow() {
       var newnodes = [];
       var position = 0;
       var newedges = [];
-      const value = event.target.value;
+      let value =  event.target.value;
 
       states.map(state => {
          newnodes = [...newnodes,
@@ -59,34 +61,57 @@ function Flow() {
       setNodes(newnodes);
       setEdges(newedges);
       position = 0;
-      newstates.add(value);
     }
   }
 
   const convertirNoDeterministico = () =>{
-    console.log(Array.from(newstates));
-    console.log(edges);
-    console.log(Array.from(newstates).flatMap(newstate => newstate.includes(',')?
-        [newstate.split(',')
-        .flatMap(state => edges
-                  .filter(edge => edge.source === state && edge.label === '0')
-                  .map(edge => edge.target))
+    let statesConverted = [];
+    do{
+      statesConverted = Array.from(newstates).flatMap(newstate => newstate.length > 1?
+      [Array.from(new Set(newstate.split('')
+      .flatMap(state => edges
+                .filter(edge => edge.source === state && edge.label === '0')
+                .map(edge => edge.target))))
+      .sort()
+      .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
+      , 
+      Array.from(new Set(newstate.split('')
+      .flatMap(state => edges
+        .filter(edge => edge.source === state && edge.label === '1')
+        .map(edge => edge.target))))
+      .sort()
+      .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
+    ]
+        
+    : [edges.filter(edge => edge.source === newstate && edge.label === '0')
+        .map(edge => edge.target)
         .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
         , 
-        newstate.split(',')
-        .flatMap(state => edges
-          .filter(edge => edge.source === state && edge.label === '1')
-          .map(edge => edge.target))
-        .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
-      ]
-          
-      : [edges.filter(edge => edge.source === newstate && edge.label === '0')
-          .map(edge => edge.target)
-          .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")
-          , 
-          edges.filter(edge => edge.source === newstate && edge.label === '1')
-          .map(edge => edge.target)
-          .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")]));
+        edges.filter(edge => edge.source === newstate && edge.label === '1')
+        .map(edge => edge.target)
+        .reduce((previewEdge, currentEdge) => previewEdge.concat(currentEdge), "")])
+
+      newstates = new Set(['A', statesConverted].flatMap(state => state));
+
+    }while(Array.from(newstates).length * 2 !== statesConverted.length)
+
+    console.log(Array.from(newstates));
+    console.log(statesConverted);
+
+    /*console.log(Array.from(newstates)
+      .map(newstate => newstate.replace(",", ""))
+      .flatMap((newstate, index) => [{
+        id: newstate,
+        data: {label: newstate},
+        position: {x: nodes[index], y: 90}
+    }]))
+    setNodesDeterministico(Array.from(newstates)
+      .map(newstate => newstate.replace(",", ""))
+      .flatMap((newstate, index) => [{
+        id: newstate,
+        data: {label: newstate},
+        position: {x: nodes[index], y: 90}
+    }]));*/
   }
 
   const onNodesChange = useCallback(
@@ -102,7 +127,7 @@ function Flow() {
     [setEdges]
   );
 
-  const states = ['A','B', 'C','D','E','F']
+  const states = ['A','B', 'C','D','E']
 
   return (
     <div style={{ height: 500 }}>
